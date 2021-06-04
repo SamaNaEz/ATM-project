@@ -17,24 +17,21 @@ class Deposit
       end
     end
     if amount.to_i != 0
-      @message.display_line_message("\n Please put envelope in deposit slot")
+      @message.display_line_message("\nPlease put envelope in deposit slot\n")
       deposit_status = DepositSlot.new.is_envelope_received
       if deposit_status == true
-        record[:total_balance] = record[:total_balance].to_i + amount / 100
-        BankDataBase.new.transaction
-        @message.display_line_message("\n==================================")
-        @message.display_line_message("\nYour deposit was approved!\n")
-        @message.display_line_message("\nThanks!")
-        @message.display_line_message("\n==================================\n")
+        record[:total_balance] = record[:total_balance].to_f + amount / 100
+        BankDataBase.new.transaction(record[:account], record[:current_amount], record[:total_balance])
+        @message.display_text_highlighted_sup('Your deposit was approved!')
+        @message.display_text_highlighted_inf('Thanks!')
       else
-        @message.display_line_message("\nTime out")
-        @message.display_line_message("\nOperation canceled by the system")
-        exit
+        @message.display_text_highlighted_sup('Time out')
+        @message.display_text_highlighted_inf('Operation canceled by the system')
+        false
       end
     else
-      @message.display_line_message("\nOperation canceled")
-      @message.display_line_message("\nThanks for use us services!")
-      exit
+      @message.display_text_highlighted_sup('Operation canceled')
+      @message.display_text_highlighted_inf('Thanks for use us services!')
     end
   end
 end

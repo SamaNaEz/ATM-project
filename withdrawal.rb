@@ -8,7 +8,7 @@ class Withdrawal
     @message = Screen.new
   end
 
-  def execute(amount, account_number)
+  def execute(amount, account_number, cash_atm)
     withdraw_amount = menu(amount)
     record = BankDataBase.new.records.find do |r|
       if r[:account].to_i == account_number
@@ -18,19 +18,23 @@ class Withdrawal
       end
     end
 
-    if record[:current_amount].to_i > withdraw_amount
-      if CashDispenser.new.is_sufficient_cash_available(withdraw_amount)
+    if withdraw_amount.zero?
+      @message.display_text_highlighted('Operation Canceled')
+    elsif record[:current_amount].to_i > withdraw_amount
+      if CashDispenser.new.is_sufficient_cash_available(withdraw_amount, cash_atm)
         record[:current_amount] = record[:current_amount].to_i - withdraw_amount
         record[:total_balance] = record[:total_balance].to_i - withdraw_amount
-        BankDataBase.new.transaction
+        BankDataBase.new.transaction(record[:account], record[:current_amount], record[:total_balance])
         CashDispenser.new.dispense_cash
-        # ATM.new.withdraw_status = true
+        cash_atm - withdraw_amount
       else
-        @message.display_line_message("\nSorry!")
-        @message.display_line_message("\nIn this moment We do not have sufficient cash, try with a smaller amount!")
+        @message.display_text_highlighted_sup('Sorry!')
+        @message.display_text_highlighted_inf('In this moment We do not have sufficient cash, try with a smaller amount!')
+        false
       end
     else
-      @message.display_line_message("\nYou do not have sufficient cash for withdraw, try with a smaller amount!")
+      @message.display_text_highlighted('You do not have sufficient cash for withdraw, try with a smaller amount!')
+      false
     end
   end
 
@@ -41,9 +45,10 @@ class Withdrawal
     when 3 then amount = 60
     when 4 then amount = 100
     when 5 then amount = 200
-    when 6 then exit
+    when 6 then amount = 0
     else
-      @message.display_line_message("\nThe option that you was selected is not exist, try again!!")
+      @message.display_text_highlighted('The option that you was selected is not exist, try again!!')
+      false
     end
   end
 end

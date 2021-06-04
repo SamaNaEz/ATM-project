@@ -1,10 +1,7 @@
 require_relative './screen'
 
 class CashDispenser
-  attr_reader :count
-
   def initialize
-    @count = 500
     @message = Screen.new
   end
 
@@ -14,7 +11,7 @@ class CashDispenser
     @message.display_line_message("\n==================================\n")
   end
 
-  def is_sufficient_cash_available(amount)
+  def is_sufficient_cash_available(amount, count)
     amount <= count
   end
 end
