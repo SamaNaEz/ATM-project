@@ -5,34 +5,15 @@ require_relative './balance_inquiry'
 require_relative './withdrawal'
 require_relative './deposit'
 require_relative './cash_dispenser'
+require_relative './account'
 
 class ATM
-
   def initialize
     @user_authenticated = false
     @message = Screen.new
     @in_user = Keypad.new
     @current_account_number = 0
     @cash_dispenser_amoun = 500
-  end
-
-  def authenticate_user(usr, pss)
-    authenticate_user_bank = BankDataBase.new
-
-    record = authenticate_user_bank.records.find do |r|
-      if r[:account].to_i == usr
-        r
-      else
-        nil
-      end
-    end
-    if !record.nil? && record[:secret].to_i == pss
-      @current_account_number = usr
-      @user_authenticated = true
-    else
-      @message.display_line_message("\nUser number or Pin Incorrect, try agan!\n\n")
-      @user_authenticated = false
-    end
   end
 
   def main_menu
@@ -64,10 +45,6 @@ class ATM
     @cash_dispenser_amoun = 500
   end
 
-  def clear
-    @user_authenticated = true
-  end
-
   def execute
     loop do
       until @user_authenticated
@@ -76,7 +53,10 @@ class ATM
         usr = @in_user.input
         @message.display_line_message('Ingrese pin: ')
         pss = @in_user.input
-        authenticate_user(usr, pss)
+        if Account.new.authenticate_user(usr, pss)
+          @user_authenticated = true
+          @current_account_number = usr
+        end
       end
 
       main_menu_option = main_menu

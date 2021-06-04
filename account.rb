@@ -1,21 +1,19 @@
-
 class Account
-  attr_accessor :account_number, :pin, :available_balance, :total_balance
+  def authenticate_user(usr, pss)
+    authenticate_user_bank = BankDataBase.new
 
-  def validate_pin(user_pin)
-    if pin == user_pin
+    record = authenticate_user_bank.records.find do |r|
+      if r[:account].to_i == usr
+        r
+      else
+        nil
+      end
+    end
+    if !record.nil? && record[:secret].to_i == pss
       true
     else
+      @message.display_line_message("\nUser number or Pin Incorrect, try agan!\n\n")
       false
     end
-  end
-
-  def credit(amount)
-    total_balance(total_balance.to_f + amount.to_f)
-  end
-
-  def debit(amount)
-    available_balance(available_balance.to_f - amount.to_f)
-    total_balance(total_balance.to_f + amount.to_f)
   end
 end
